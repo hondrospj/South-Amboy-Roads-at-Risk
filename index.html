@@ -5180,7 +5180,7 @@
     function recurrenceText(stageFt){
       const years = state.floodStats?.archive?.years || 0;
       const count = countDailyExceedances(stageFt);
-      if(!years || !state.floodStats?.dailyPeakNavd88Ft?.length) return "-";
+      if(!years || !dailyArchive().length) return "-";
       if(count <= 0) return `>${years.toFixed(1)} yr`;
       const perYear = count / years;
       if(perYear >= 1) return `~${(365.2425 / perYear).toFixed(1)} days`;
@@ -5222,13 +5222,16 @@
     }
 
     function dailyArchive(){
+      const compact = state.floodStats?.dailyPeakCompact;
+      if(Array.isArray(compact)){
+        return compact
+          .map(row => ({ date:String(row?.[0] || "").slice(0, 10), peakFt:Number(row?.[1]) / 100 }))
+          .filter(row => /^\d{4}-\d{2}-\d{2}$/.test(row.date) && Number.isFinite(row.peakFt));
+      }
       const rows = state.floodStats?.dailyPeakArchive;
       if(!Array.isArray(rows)) return [];
       return rows
-        .map(row => ({
-          date:String(row.date || "").slice(0, 10),
-          peakFt:Number(row.peakNavd88Ft)
-        }))
+        .map(row => ({ date:String(row.date || "").slice(0, 10), peakFt:Number(row.peakNavd88Ft) }))
         .filter(row => /^\d{4}-\d{2}-\d{2}$/.test(row.date) && Number.isFinite(row.peakFt));
     }
 
